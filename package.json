@@ -1,0 +1,13 @@
+{
+  "name": "babycare-ai-platform",
+  "private": true,
+  "workspaces": [
+    "client",
+    "shared/types"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @babycare/client run dev",
+    "test": "npm --workspace @babycare/client run test"
+  }
+}
+
