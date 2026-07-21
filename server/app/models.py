@@ -30,7 +30,7 @@ class UserRole(StrEnum):
 
 
 class PrescriptionStatus(StrEnum):
-    PENDING = "pending"
+    PENDING_REVIEW = "pending_review"
     REVIEWED = "reviewed"
     FLAGGED = "flagged"
 
@@ -118,7 +118,7 @@ class Prescription(Base):
     extracted_text: Mapped[dict[str, Any]] = mapped_column(JSON)
     status: Mapped[PrescriptionStatus] = mapped_column(
         SqlEnum(PrescriptionStatus, values_callable=enum_values, native_enum=False),
-        default=PrescriptionStatus.PENDING,
+        default=PrescriptionStatus.PENDING_REVIEW,
     )
     reviewer_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True

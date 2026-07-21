@@ -47,3 +47,18 @@ Apply migrations with:
 ```bash
 .venv/bin/alembic -c server/alembic.ini upgrade head
 ```
+
+## OCR dependency
+
+Prescription extraction uses the `pytesseract` Python package and requires the
+Tesseract executable on the API host:
+
+```bash
+# macOS
+brew install tesseract
+
+# Debian/Ubuntu
+sudo apt-get install tesseract-ocr
+```
+
+If the executable is unavailable, the extraction endpoint returns HTTP 503.
