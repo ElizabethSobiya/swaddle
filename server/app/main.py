@@ -15,6 +15,16 @@ app.include_router(content_router)
 app.include_router(consultations_router)
 
 
+@app.get("/")
+def api_index() -> dict[str, str]:
+    return {
+        "name": "Swaddle API",
+        "status": "running",
+        "health": "/api/health",
+        "docs": "/docs",
+    }
+
+
 @app.get("/api/health")
 def health_check() -> dict[str, str]:
     get_settings()

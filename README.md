@@ -17,13 +17,14 @@ Monorepo starter for an AI-assisted baby care application.
 3. Run `make dev`.
 
 The client runs at <http://localhost:5173>, the API at
-<http://localhost:8000>, and Postgres at `localhost:5432`.
+<http://localhost:8001>, and Postgres at `localhost:5433` (mapped to port 5432
+inside Docker).
 
 | Client | Server |
 | --- | --- |
 | React + TypeScript | FastAPI + Python 3.11 |
-| `http://localhost:5173` | `http://localhost:8000` |
-| `npm --workspace @swaddle/client run dev` | `.venv/bin/uvicorn app.main:app --app-dir server --reload` |
+| `http://localhost:5173` | `http://localhost:8001` |
+| `npm --workspace @swaddle/client run dev` | `.venv/bin/uvicorn app.main:app --app-dir server --reload --port 8001` |
 
 The root `.gitignore` keeps generated client and server files out of version
 control while retaining `.env.example` as the shared configuration template.

@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     )
 
     openai_api_key: str = ""
-    database_url: str = "postgresql+psycopg://swaddle:swaddle@localhost:5432/swaddle"
+    database_url: str = "postgresql+psycopg://swaddle:swaddle@localhost:5433/swaddle"
     cloudinary_url: str = ""
 
 

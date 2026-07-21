@@ -13,7 +13,7 @@ dev:
 	@test -x "$(PYTHON)" || (echo "Run 'make install' first." && exit 1)
 	docker compose up -d db
 	@trap 'kill 0' INT TERM EXIT; \
-		$(PYTHON) -m uvicorn app.main:app --app-dir server --reload & \
+		$(PYTHON) -m uvicorn app.main:app --app-dir server --reload --port 8001 & \
 		npm --workspace @swaddle/client run dev & \
 		wait
 
