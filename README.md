@@ -10,11 +10,38 @@ Monorepo starter for an AI-assisted baby care application.
 
 ## Quick start
 
-1. Copy `.env.example` to `.env` and fill in any required values.
-2. Install dependencies:
-   - `npm install`
-   - `python3.11 -m venv .venv && .venv/bin/pip install -e "server[dev]"`
-3. Run `make dev`.
+### Prerequisites
+
+- Node.js 20 or newer and npm
+- Python 3.11
+- Docker Desktop (running)
+- Tesseract OCR (only required for prescription image/PDF extraction)
+
+### Install and run
+
+Run these commands from the repository root:
+
+```bash
+# 1. Install the client and server dependencies.
+make install
+
+# 2. Create your local configuration.
+cp .env.example .env
+
+# 3. Start Postgres (the Compose service is named "db").
+docker compose up -d db
+
+# 4. Apply migrations and load the resettable demo data.
+make seed
+
+# 5. Start both the FastAPI and Vite development servers.
+make dev
+```
+
+Set `OPENAI_API_KEY` in `.env` to use symptom checking, prescription
+structuring, and optional product AI explanations. The age-based product and
+content browsing flows work without it. `CLOUDINARY_URL` is only a placeholder
+for roadmap storage integration and is not required by this version.
 
 The client runs at <http://localhost:5173>, the API at
 <http://localhost:8001>, and Postgres at `localhost:5433` (mapped to port 5432
@@ -31,9 +58,16 @@ control while retaining `.env.example` as the shared configuration template.
 
 ## Commands
 
+- `make install` — create `.venv` and install all dependencies
 - `make dev` — start Postgres, the API, and the Vite development server
 - `make test` — run client and server checks/tests
-- `make seed` — insert local development seed data
+- `make seed` — apply migrations, clear demo tables, and repopulate seed data
+
+Stop the development servers with `Ctrl+C`. Stop Postgres separately with:
+
+```bash
+docker compose down
+```
 
 ## Database migrations
 
@@ -48,6 +82,9 @@ Apply migrations with:
 ```bash
 .venv/bin/alembic -c server/alembic.ini upgrade head
 ```
+
+The commands use Postgres at `localhost:5433`. The service is `db`, so use
+`docker compose up -d db` rather than `docker compose up -d postgres`.
 
 ## OCR dependency
 

@@ -52,9 +52,13 @@ export function ConsultPage() {
   return (
     <>
       <PageHeader eyebrow="Scheduled care" title="Book a consultation">
-        Choose an available pediatrician time. Live video is not included in
-        this demo.
+        Choose an available pediatrician time, click book, and receive a demo
+        confirmation.
       </PageHeader>
+      <aside className="mb-6 rounded-2xl border border-sky-200 bg-sky-50 px-5 py-4 text-sm font-medium leading-6 text-sky-900">
+        This is a mocked booking flow — real-time 24hr video consultation is on
+        the roadmap, not built in this version.
+      </aside>
       {confirmation ? (
         <section className="mx-auto max-w-xl rounded-[2rem] border border-emerald-200 bg-emerald-50 p-8 text-center">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-600 text-2xl text-white">
@@ -105,7 +109,7 @@ export function ConsultPage() {
                 <span
                   className={`mt-3 inline-block rounded-full px-2 py-1 text-xs font-bold ${slot.status === 'available' ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-slate-500'}`}
                 >
-                  {slot.status}
+                  {slot.status === 'available' ? 'Available' : 'Booked'}
                 </span>
               </button>
             ))}

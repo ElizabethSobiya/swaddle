@@ -186,11 +186,6 @@ function ContentCard({ item }: { item: ContentItem }) {
           </div>
         </div>
       )}
-      {item.type === 'activity' && (
-        <p className="mt-4 text-xs font-semibold text-amber-700">
-          Data-driven game configuration ready
-        </p>
-      )}
     </article>
   );
 }

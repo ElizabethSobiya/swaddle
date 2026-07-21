@@ -136,12 +136,12 @@ export function ShopPage({ baby }: { baby: BabyProfile }) {
                     </span>
                   ))}
                 </div>
-                <p className="mt-5 flex-1 rounded-2xl bg-teal-50 p-4 text-sm leading-6 text-teal-900">
-                  {product.explanation ??
-                    (product.matchedTags.length
-                      ? `Matches: ${product.matchedTags.join(', ')}.`
-                      : 'Recommended for the current age range.')}
-                </p>
+                {(product.explanation || product.matchedTags.length > 0) && (
+                  <p className="mt-5 flex-1 rounded-2xl bg-teal-50 p-4 text-sm leading-6 text-teal-900">
+                    {product.explanation ??
+                      `Matches: ${product.matchedTags.join(', ')}.`}
+                  </p>
+                )}
                 <p className="mt-4 text-xs text-slate-400">
                   Ages {product.ageMinMonths}–{product.ageMaxMonths} months
                 </p>
