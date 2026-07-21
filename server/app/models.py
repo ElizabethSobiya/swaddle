@@ -1,13 +1,12 @@
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from sqlalchemy import (
     JSON,
     Date,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     Integer,
     Numeric,
@@ -15,37 +14,40 @@ from sqlalchemy import (
     Text,
     func,
 )
+from sqlalchemy import (
+    Enum as SqlEnum,
+)
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     PARENT = "parent"
     PEDIATRICIAN = "pediatrician"
     REVIEWER = "reviewer"
 
 
-class PrescriptionStatus(str, Enum):
+class PrescriptionStatus(StrEnum):
     PENDING = "pending"
     REVIEWED = "reviewed"
     FLAGGED = "flagged"
 
 
-class ContentType(str, Enum):
+class ContentType(StrEnum):
     RHYME = "rhyme"
     VIDEO = "video"
     SOUND = "sound"
     ACTIVITY = "activity"
 
 
-class SlotStatus(str, Enum):
+class SlotStatus(StrEnum):
     AVAILABLE = "available"
     BOOKED = "booked"
 
 
-def enum_values(enum: type[Enum]) -> list[str]:
+def enum_values(enum: type[StrEnum]) -> list[str]:
     return [member.value for member in enum]
 
 

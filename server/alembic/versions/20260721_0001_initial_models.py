@@ -7,8 +7,9 @@ Revises:
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision: str = "20260721_0001"
 down_revision: str | None = None
@@ -24,9 +25,7 @@ prescription_status = sa.Enum(
 content_type = sa.Enum(
     "rhyme", "video", "sound", "activity", name="contenttype", native_enum=False
 )
-slot_status = sa.Enum(
-    "available", "booked", name="slotstatus", native_enum=False
-)
+slot_status = sa.Enum("available", "booked", name="slotstatus", native_enum=False)
 
 
 def upgrade() -> None:
@@ -110,9 +109,7 @@ def upgrade() -> None:
             nullable=False,
         ),
     )
-    op.create_index(
-        "ix_symptom_queries_baby_id", "symptom_queries", ["baby_id"]
-    )
+    op.create_index("ix_symptom_queries_baby_id", "symptom_queries", ["baby_id"])
 
     op.create_table(
         "prescriptions",
@@ -135,9 +132,7 @@ def upgrade() -> None:
         sa.Column("reviewer_note", sa.Text(), nullable=True),
     )
     op.create_index("ix_prescriptions_baby_id", "prescriptions", ["baby_id"])
-    op.create_index(
-        "ix_prescriptions_reviewer_id", "prescriptions", ["reviewer_id"]
-    )
+    op.create_index("ix_prescriptions_reviewer_id", "prescriptions", ["reviewer_id"])
 
 
 def downgrade() -> None:

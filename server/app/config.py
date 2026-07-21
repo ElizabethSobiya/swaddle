@@ -9,13 +9,10 @@ class Settings(BaseSettings):
     )
 
     openai_api_key: str = ""
-    database_url: str = (
-        "postgresql+psycopg://babycare:babycare@localhost:5432/babycare"
-    )
+    database_url: str = "postgresql+psycopg://babycare:babycare@localhost:5432/babycare"
     cloudinary_url: str = ""
 
 
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

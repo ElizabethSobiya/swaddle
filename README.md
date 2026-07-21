@@ -19,6 +19,15 @@ Monorepo starter for an AI-assisted baby care application.
 The client runs at <http://localhost:5173>, the API at
 <http://localhost:8000>, and Postgres at `localhost:5432`.
 
+| Client | Server |
+| --- | --- |
+| React + TypeScript | FastAPI + Python 3.11 |
+| `http://localhost:5173` | `http://localhost:8000` |
+| `npm --workspace @babycare/client run dev` | `.venv/bin/uvicorn app.main:app --app-dir server --reload` |
+
+The root `.gitignore` keeps generated client and server files out of version
+control while retaining `.env.example` as the shared configuration template.
+
 ## Commands
 
 - `make dev` — start Postgres, the API, and the Vite development server
