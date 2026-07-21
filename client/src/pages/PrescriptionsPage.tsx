@@ -63,22 +63,68 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
       </div>
       <form
         onSubmit={upload}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault();
+          setFile(event.dataTransfer.files?.[0] ?? null);
+        }}
         className="rounded-3xl border-2 border-dashed border-stone-300 bg-white p-8 text-center"
       >
-        <p className="font-bold">Drop in a prescription image or PDF</p>
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-teal-50 text-teal-700">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            className="h-7 w-7"
+          >
+            <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" />
+            <path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+          </svg>
+        </span>
+        <p className="mt-4 font-bold">Drop in a prescription image or PDF</p>
         <p className="mt-1 text-sm text-slate-500">
           The result always requires pharmacist or doctor review.
         </p>
         <input
+          id="prescription-file"
           required
           type="file"
           accept="image/*,.pdf"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="mx-auto mt-5 block max-w-full text-sm"
+          className="sr-only"
         />
+        <label
+          htmlFor="prescription-file"
+          className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-5 py-3 text-sm font-bold text-teal-800 transition hover:border-teal-300 hover:bg-teal-100 focus-within:ring-2 focus-within:ring-teal-200"
+        >
+          <span aria-hidden="true">＋</span>
+          {file ? 'Browse another file' : 'Browse files'}
+        </label>
+        {file && (
+          <div className="mx-auto mt-4 flex max-w-md items-center justify-between gap-3 rounded-xl bg-stone-50 px-4 py-3 text-left">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-700">
+                {file.name}
+              </p>
+              <p className="text-xs text-slate-400">
+                {(file.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFile(null)}
+              aria-label="Remove selected file"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-rose-600"
+            >
+              ×
+            </button>
+          </div>
+        )}
         <button
           disabled={!file || loading}
-          className="mt-5 rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-40"
+          className="mx-auto mt-7 block rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-40"
         >
           Extract text
         </button>

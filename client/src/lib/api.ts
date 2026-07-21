@@ -61,7 +61,18 @@ interface ConfirmationWire {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, init);
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      ...init,
+      signal: init?.signal ?? AbortSignal.timeout(15_000),
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'TimeoutError') {
+      throw new Error('The server took too long to respond. Please try again.');
+    }
+    throw error;
+  }
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as {
       detail?: string;

@@ -67,16 +67,66 @@ export function LibraryPage({ ageMonths }: { ageMonths: number }) {
   );
 }
 function ContentCard({ item }: { item: ContentItem }) {
+  const [showVideo, setShowVideo] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(false);
   const icon = { rhyme: '♫', video: '▶', sound: '♪', activity: '✦' }[item.type];
+
+  function playGeneratedSound() {
+    const context = new AudioContext();
+    const rawCues = item.config?.cues;
+    const frequencies = Array.isArray(rawCues)
+      ? rawCues
+          .map((cue) =>
+            typeof cue === 'number'
+              ? cue
+              : typeof cue === 'object' &&
+                  cue !== null &&
+                  'frequency_hz' in cue &&
+                  typeof cue.frequency_hz === 'number'
+                ? cue.frequency_hz
+                : null,
+          )
+          .filter((frequency): frequency is number => frequency !== null)
+      : typeof item.config?.frequency_hz === 'number'
+        ? [item.config.frequency_hz]
+        : [392];
+    const duration =
+      typeof item.config?.duration_ms === 'number'
+        ? item.config.duration_ms / 1000
+        : 0.4;
+    const gainValue =
+      typeof item.config?.gain === 'number' ? item.config.gain : 0.1;
+
+    frequencies.forEach((frequency, index) => {
+      const start = context.currentTime + index * (duration + 0.15);
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(gainValue, start + 0.03);
+      gain.gain.linearRampToValueAtTime(0, start + duration);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration);
+    });
+    window.setTimeout(
+      () => void context.close(),
+      (frequencies.length * (duration + 0.15) + 0.2) * 1000,
+    );
+  }
+
   return (
-    <article className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <article className="flex h-full flex-col rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-50 text-xl text-teal-700">
         {icon}
       </div>
       <p className="mt-5 text-xs font-bold uppercase tracking-widest text-teal-600">
         {item.type}
       </p>
-      <h2 className="font-display mt-1 text-xl font-bold">{item.title}</h2>
+      <h2 className="font-display mt-1 min-h-14 text-xl font-bold">
+        {item.title}
+      </h2>
       <p className="mt-2 text-sm text-slate-500">
         Ages {item.ageMinMonths}–{item.ageMaxMonths} months
       </p>
@@ -85,18 +135,62 @@ function ContentCard({ item }: { item: ContentItem }) {
           {String(item.config?.instructions ?? 'Interactive activity')}
         </p>
       )}
-      <a
-        href={
-          item.type === 'video'
-            ? `https://www.youtube.com/watch?v=${item.url}`
-            : item.url
-        }
-        target="_blank"
-        rel="noreferrer"
-        className="mt-5 inline-block text-sm font-bold text-teal-700"
-      >
-        {item.type === 'activity' ? 'View game config' : 'Open content'} →
-      </a>
+      {item.type === 'video' && !showVideo && (
+        <button
+          type="button"
+          onClick={() => {
+            setVideoLoading(true);
+            setShowVideo(true);
+          }}
+          className="mt-5 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-bold text-white"
+        >
+          Load video
+        </button>
+      )}
+      {item.type === 'video' && showVideo && (
+        <div className="relative mt-5 aspect-video overflow-hidden rounded-2xl bg-slate-100">
+          {videoLoading && (
+            <div className="absolute inset-0 grid place-items-center text-sm text-slate-500">
+              Loading video…
+            </div>
+          )}
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${item.url}`}
+            title={item.title}
+            loading="lazy"
+            allow="accelerometer; autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
+            onLoad={() => setVideoLoading(false)}
+            className="absolute inset-0 h-full w-full"
+          />
+        </div>
+      )}
+      {item.type === 'rhyme' && (
+        <audio controls preload="none" className="mt-5 w-full">
+          <source src={item.url} type="audio/ogg" />
+        </audio>
+      )}
+      {item.type === 'sound' && (
+        <div className="flex flex-1 flex-col">
+          <p className="mt-4 rounded-xl bg-sky-50 p-3 text-sm text-sky-900">
+            {String(item.config?.description ?? 'A short listening activity.')}
+          </p>
+          <div className="mt-auto pt-4">
+            <button
+              type="button"
+              onClick={playGeneratedSound}
+              className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white"
+            >
+              Play sound cue
+            </button>
+          </div>
+        </div>
+      )}
+      {item.type === 'activity' && (
+        <p className="mt-4 text-xs font-semibold text-amber-700">
+          Data-driven game configuration ready
+        </p>
+      )}
     </article>
   );
 }
