@@ -25,4 +25,5 @@ test:
 
 seed:
 	@test -x "$(PYTHON)" || (echo "Run 'make install' first." && exit 1)
+	$(PYTHON) -m alembic -c server/alembic.ini upgrade head
 	PYTHONPATH=server $(PYTHON) server/scripts/seed.py

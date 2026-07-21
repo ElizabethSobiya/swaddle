@@ -25,3 +25,16 @@ The client runs at <http://localhost:5173>, the API at
 - `make test` — run client and server checks/tests
 - `make seed` — insert local development seed data
 
+## Database migrations
+
+Create a migration after changing models:
+
+```bash
+.venv/bin/alembic -c server/alembic.ini revision --autogenerate -m "describe change"
+```
+
+Apply migrations with:
+
+```bash
+.venv/bin/alembic -c server/alembic.ini upgrade head
+```
