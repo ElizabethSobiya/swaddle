@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ContentItem, ContentType } from '@babycare/types';
+import type { ContentItem, ContentType } from '@swaddle/types';
 import {
   EmptyState,
   ErrorState,

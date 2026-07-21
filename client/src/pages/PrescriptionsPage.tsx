@@ -3,7 +3,7 @@ import type {
   BabyProfile,
   PrescriptionExtraction,
   PrescriptionStatus,
-} from '@babycare/types';
+} from '@swaddle/types';
 import { ErrorState, LoadingState, PageHeader } from '../components/UI';
 import { extractPrescription, reviewPrescription } from '../lib/api';
 

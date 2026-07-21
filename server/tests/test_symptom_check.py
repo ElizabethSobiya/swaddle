@@ -88,3 +88,39 @@ def test_difficulty_breathing_forces_high_alert() -> None:
     assert response.json()["alert_level"] == "high"
     prompt = openai_client.responses.parse.call_args.kwargs["input"][0]["content"]
     assert "Never suggest or mention specific medicines" in prompt
+
+
+def test_symptom_check_rejects_invalid_payload_without_calling_model() -> None:
+    openai_client = MagicMock()
+    app.dependency_overrides[get_openai_client] = lambda: openai_client
+    app.dependency_overrides[get_db] = lambda: MagicMock()
+    try:
+        response = TestClient(app).post(
+            "/api/assistant/symptom-check",
+            json={"baby_id": 0, "symptoms": "", "age_months": -1},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+    fields = {error["loc"][-1] for error in response.json()["detail"]}
+    assert fields == {"baby_id", "symptoms", "age_months"}
+    openai_client.responses.parse.assert_not_called()
+
+
+def test_symptom_check_returns_bad_gateway_for_invalid_model_output() -> None:
+    openai_client = MagicMock()
+    openai_client.responses.parse.return_value = SimpleNamespace(output_parsed=None)
+    db = MagicMock()
+    app.dependency_overrides[get_openai_client] = lambda: openai_client
+    app.dependency_overrides[get_db] = lambda: db
+    try:
+        response = TestClient(app).post(
+            "/api/assistant/symptom-check",
+            json={"baby_id": 1, "symptoms": "Mild cough", "age_months": 8},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 502
+    db.commit.assert_not_called()

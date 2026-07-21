@@ -6,7 +6,7 @@ import type {
   PrescriptionExtraction,
   ProductRecommendation,
   SymptomCheckResult,
-} from '@babycare/types';
+} from '@swaddle/types';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 

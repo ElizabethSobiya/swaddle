@@ -1,4 +1,4 @@
-"""Create BabyCare core tables.
+"""Create Swaddle core tables.
 
 Revision ID: 20260721_0001
 Revises:

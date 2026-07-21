@@ -1,4 +1,4 @@
-import type { BabyProfile } from '@babycare/types';
+import type { BabyProfile } from '@swaddle/types';
 import type { PageName } from '../components/AppShell';
 import { PageHeader } from '../components/UI';
 

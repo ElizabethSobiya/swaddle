@@ -71,3 +71,15 @@ def test_booking_booked_slot_returns_conflict() -> None:
 
     assert response.status_code == 409
     session.commit.assert_not_called()
+
+
+def test_booking_rejects_invalid_slot_id() -> None:
+    session = MagicMock()
+    app.dependency_overrides[get_db] = lambda: session
+    try:
+        response = TestClient(app).post("/api/consultations/book", json={"slot_id": 0})
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+    session.scalar.assert_not_called()

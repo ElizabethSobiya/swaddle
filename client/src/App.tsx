@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { BabyProfile } from '@babycare/types';
+import type { BabyProfile } from '@swaddle/types';
 
 import { AppShell, type PageName } from './components/AppShell';
 import { ConsultPage } from './pages/ConsultPage';

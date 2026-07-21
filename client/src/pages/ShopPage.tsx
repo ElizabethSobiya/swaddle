@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { BabyProfile, ProductRecommendation } from '@babycare/types';
+import type { BabyProfile, ProductRecommendation } from '@swaddle/types';
 import {
   EmptyState,
   ErrorState,

@@ -75,6 +75,41 @@ def test_extract_rejects_unsupported_file_type() -> None:
     assert response.status_code == 415
 
 
+def test_extract_rejects_missing_file() -> None:
+    extraction_dependencies()
+    response = TestClient(app).post("/api/prescriptions/extract", data={"baby_id": "1"})
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+
+
+def test_extract_rejects_empty_upload() -> None:
+    _, db = extraction_dependencies()
+    response = TestClient(app).post(
+        "/api/prescriptions/extract",
+        data={"baby_id": "1"},
+        files={"file": ("rx.png", b"", "image/png")},
+    )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 400
+    db.add.assert_not_called()
+
+
+def test_extract_returns_not_found_for_unknown_baby() -> None:
+    _, db = extraction_dependencies()
+    db.get.return_value = None
+    response = TestClient(app).post(
+        "/api/prescriptions/extract",
+        data={"baby_id": "999"},
+        files={"file": ("rx.png", b"image bytes", "image/png")},
+    )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 404
+    db.add.assert_not_called()
+
+
 def test_review_allows_reviewer_to_flag_with_note() -> None:
     prescription = Prescription(
         id=7,
@@ -131,3 +166,38 @@ def test_review_rejects_pending_review_status() -> None:
     app.dependency_overrides.clear()
 
     assert response.status_code == 422
+
+
+def test_review_rejects_blank_note() -> None:
+    reviewer = SimpleNamespace(id=9, role=UserRole.REVIEWER)
+    db = MagicMock()
+    app.dependency_overrides[get_current_reviewer] = lambda: reviewer
+    app.dependency_overrides[get_db] = lambda: db
+    try:
+        response = TestClient(app).patch(
+            "/api/prescriptions/7/review",
+            json={"status": "reviewed", "note": ""},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+    db.commit.assert_not_called()
+
+
+def test_review_returns_not_found_for_unknown_prescription() -> None:
+    reviewer = SimpleNamespace(id=9, role=UserRole.REVIEWER)
+    db = MagicMock()
+    db.get.return_value = None
+    app.dependency_overrides[get_current_reviewer] = lambda: reviewer
+    app.dependency_overrides[get_db] = lambda: db
+    try:
+        response = TestClient(app).patch(
+            "/api/prescriptions/999/review",
+            json={"status": "reviewed", "note": "Verified."},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 404
+    db.commit.assert_not_called()

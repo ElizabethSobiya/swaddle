@@ -1,1 +1,1 @@
-"""BabyCare API package."""
+"""Swaddle API package."""

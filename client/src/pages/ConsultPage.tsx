@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { BookingConfirmation, ConsultationSlot } from '@babycare/types';
+import type { BookingConfirmation, ConsultationSlot } from '@swaddle/types';
 import {
   EmptyState,
   ErrorState,

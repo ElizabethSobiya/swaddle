@@ -14,11 +14,11 @@ dev:
 	docker compose up -d db
 	@trap 'kill 0' INT TERM EXIT; \
 		$(PYTHON) -m uvicorn app.main:app --app-dir server --reload & \
-		npm --workspace @babycare/client run dev & \
+		npm --workspace @swaddle/client run dev & \
 		wait
 
 test:
-	npm --workspace @babycare/client run test
+	npm --workspace @swaddle/client run test
 	$(PYTHON) -m pytest server
 	$(PYTHON) -m ruff check server shared/types
 	$(PYTHON) -m black --check server shared/types

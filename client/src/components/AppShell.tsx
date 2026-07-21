@@ -35,7 +35,7 @@ export function AppShell({
           </span>
           <div>
             <p className="font-display text-xl font-bold text-slate-900">
-              BabyCare
+              Swaddle
             </p>
             <p className="text-xs text-slate-500">AI care companion</p>
           </div>

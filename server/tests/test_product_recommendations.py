@@ -119,3 +119,29 @@ def test_endpoint_preserves_rules_when_ai_is_not_configured() -> None:
     assert len(response.json()["rule_based"]) == 2
     assert response.json()["ai_explained"] is None
     assert "OPENAI_API_KEY" in response.json()["ai_unavailable_reason"]
+
+
+def test_endpoint_rejects_invalid_baby_id() -> None:
+    db = MagicMock()
+    app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_optional_openai_client] = lambda: None
+    try:
+        response = TestClient(app).get("/api/products/recommend?baby_id=0")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+    db.get.assert_not_called()
+
+
+def test_endpoint_returns_not_found_for_unknown_baby() -> None:
+    db = MagicMock()
+    db.get.return_value = None
+    app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_optional_openai_client] = lambda: None
+    try:
+        response = TestClient(app).get("/api/products/recommend?baby_id=999")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 404

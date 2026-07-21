@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import type { BabyProfile, SymptomCheckResult } from '@babycare/types';
+import type { BabyProfile, SymptomCheckResult } from '@swaddle/types';
 import { ErrorState, LoadingState, PageHeader } from '../components/UI';
 import { checkSymptoms } from '../lib/api';
 
