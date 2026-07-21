@@ -12,3 +12,14 @@ export interface CareEntry {
   notes?: string;
 }
 
+export type ContentType = 'rhyme' | 'video' | 'sound' | 'activity';
+
+export interface ContentItem {
+  id: number;
+  type: ContentType;
+  title: string;
+  url: string;
+  ageMinMonths: number;
+  ageMaxMonths: number;
+  config?: Record<string, unknown> | null;
+}

@@ -154,6 +154,7 @@ class ContentItem(Base):
     url: Mapped[str] = mapped_column(String(2048))
     age_min_months: Mapped[int] = mapped_column(Integer)
     age_max_months: Mapped[int] = mapped_column(Integer)
+    config: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
 
 class ConsultationSlot(Base):

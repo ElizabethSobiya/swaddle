@@ -63,6 +63,7 @@ class ContentItemSchema(Schema):
     url: str
     age_min_months: int = Field(ge=0)
     age_max_months: int = Field(ge=0)
+    config: dict[str, Any] | None = None
 
 
 class ConsultationSlotSchema(Schema):

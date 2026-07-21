@@ -1,7 +1,8 @@
 """Pydantic mirrors of the platform's shared TypeScript interfaces."""
 
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -17,7 +18,7 @@ class SharedModel(BaseModel):
     )
 
 
-class CareCategory(str, Enum):
+class CareCategory(StrEnum):
     FEEDING = "feeding"
     SLEEP = "sleep"
     DIAPER = "diaper"
@@ -36,3 +37,20 @@ class CareEntry(SharedModel):
     category: CareCategory
     occurred_at: datetime
     notes: str | None = None
+
+
+class ContentType(StrEnum):
+    RHYME = "rhyme"
+    VIDEO = "video"
+    SOUND = "sound"
+    ACTIVITY = "activity"
+
+
+class ContentItem(SharedModel):
+    id: int
+    type: ContentType
+    title: str
+    url: str
+    age_min_months: int
+    age_max_months: int
+    config: dict[str, Any] | None = None

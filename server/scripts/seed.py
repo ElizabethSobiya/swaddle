@@ -36,22 +36,215 @@ PRODUCTS = [
     ("Lightweight Baby Carrier", "travel", 3, 24, "69.00", ["ergonomic", "adjustable"]),
 ]
 
+COMMONS = "https://commons.wikimedia.org/wiki/Special:Redirect/file/"
+
+# URLs and licensing metadata are kept together so media provenance remains auditable.
 CONTENT_ITEMS = [
-    ("rhyme", "Twinkle, Twinkle, Little Star", "twinkle.mp3", 0, 36),
-    ("rhyme", "Itsy Bitsy Spider", "itsy-bitsy-spider.mp3", 3, 36),
-    ("rhyme", "Row, Row, Row Your Boat", "row-your-boat.mp3", 3, 36),
-    ("video", "Gentle Newborn Tummy Time", "newborn-tummy-time", 0, 3),
-    ("video", "Supported Sitting Practice", "supported-sitting", 4, 9),
-    ("video", "First Foods: Safe Textures", "first-food-textures", 6, 12),
-    ("sound", "Calming Ocean Waves", "ocean-waves.mp3", 0, 36),
-    ("sound", "Steady White Noise", "white-noise.mp3", 0, 24),
-    ("sound", "Soft Rain for Naptime", "soft-rain.mp3", 0, 36),
-    ("activity", "High-Contrast Card Play", "high-contrast-cards", 0, 4),
-    ("activity", "Reach and Grasp Game", "reach-and-grasp", 3, 8),
-    ("activity", "Texture Treasure Basket", "texture-basket", 6, 18),
-    ("activity", "Peekaboo Object Permanence", "peekaboo", 6, 18),
-    ("activity", "Name the Body Parts", "body-parts", 12, 30),
-    ("activity", "Indoor Toddler Obstacle Path", "obstacle-path", 18, 36),
+    {
+        "type": "rhyme",
+        "title": "Twinkle, Twinkle, Little Star",
+        "url": f"{COMMONS}Twinkle_Twinkle_Little_Star_plain.ogg",
+        "ages": (0, 36),
+        "config": {
+            "license": "Public domain",
+            "author": "CambridgeBayWeather",
+            "source_page": "https://commons.wikimedia.org/wiki/File:Twinkle_Twinkle_Little_Star_plain.ogg",
+        },
+    },
+    {
+        "type": "rhyme",
+        "title": "Itsy Bitsy Spider",
+        "url": f"{COMMONS}Itsy_Bitsy_Spider.ogg",
+        "ages": (3, 36),
+        "config": {
+            "license": "CC BY-SA 3.0 / GFDL",
+            "author": "Wwaters",
+            "source_page": "https://commons.wikimedia.org/wiki/File:Itsy_Bitsy_Spider.ogg",
+        },
+    },
+    {
+        "type": "rhyme",
+        "title": "Row, Row, Row Your Boat",
+        "url": f"{COMMONS}Row%2C_Row%2C_Row_Your_Boat.ogg",
+        "ages": (3, 36),
+        "config": {
+            "license": "CC BY-SA 3.0 / GFDL",
+            "author": "CambridgeBayWeather",
+            "source_page": "https://commons.wikimedia.org/wiki/File:Row,_Row,_Row_Your_Boat.ogg",
+        },
+    },
+    {
+        "type": "rhyme",
+        "title": "Mary Had a Little Lamb",
+        "url": f"{COMMONS}Mary_Had_a_Little_Lamb.ogg",
+        "ages": (3, 36),
+        "config": {
+            "license": "Public domain",
+            "author": "Celestianpower",
+            "source_page": "https://commons.wikimedia.org/wiki/File:Mary_Had_a_Little_Lamb.ogg",
+        },
+    },
+    {
+        "type": "video",
+        "title": "Animal Sounds Song",
+        "url": "33UG1Uch05Y",
+        "ages": (12, 48),
+        "config": {"provider": "youtube", "channel": "Kids TV"},
+    },
+    {
+        "type": "video",
+        "title": "Alphabet Song",
+        "url": "cE3LzPQgQmk",
+        "ages": (18, 60),
+        "config": {"provider": "youtube", "channel": "Kids TV"},
+    },
+    {
+        "type": "video",
+        "title": "Wheels on the Bus",
+        "url": "CeUAFs_KyIc",
+        "ages": (12, 48),
+        "config": {"provider": "youtube", "channel": "Kids TV"},
+    },
+    {
+        "type": "video",
+        "title": "Classic Nursery Rhymes",
+        "url": "NVNE19OHfVg",
+        "ages": (18, 60),
+        "config": {"provider": "youtube", "channel": "Doggyland"},
+    },
+    {
+        "type": "sound",
+        "title": "Soft Low Tone",
+        "url": "generated://tone/low",
+        "ages": (0, 36),
+        "config": {
+            "generator": "oscillator",
+            "waveform": "sine",
+            "frequency_hz": 220,
+            "duration_ms": 900,
+            "gain": 0.15,
+        },
+    },
+    {
+        "type": "sound",
+        "title": "Soft Middle Tone",
+        "url": "generated://tone/middle",
+        "ages": (0, 36),
+        "config": {
+            "generator": "oscillator",
+            "waveform": "sine",
+            "frequency_hz": 329.63,
+            "duration_ms": 900,
+            "gain": 0.15,
+        },
+    },
+    {
+        "type": "sound",
+        "title": "Soft High Tone",
+        "url": "generated://tone/high",
+        "ages": (0, 36),
+        "config": {
+            "generator": "oscillator",
+            "waveform": "sine",
+            "frequency_hz": 440,
+            "duration_ms": 900,
+            "gain": 0.15,
+        },
+    },
+    {
+        "type": "activity",
+        "title": "Primary Color Tone Match",
+        "url": "game://color-sound/primary",
+        "ages": (12, 36),
+        "config": {
+            "game_type": "color_sound_match",
+            "instructions": "Hear a tone, then tap its color.",
+            "shuffle": True,
+            "pairs": [
+                {"id": "red-low", "label": "Red", "color": "#EF4444", "tone_hz": 220},
+                {
+                    "id": "yellow-mid",
+                    "label": "Yellow",
+                    "color": "#FACC15",
+                    "tone_hz": 329.63,
+                },
+                {
+                    "id": "blue-high",
+                    "label": "Blue",
+                    "color": "#3B82F6",
+                    "tone_hz": 440,
+                },
+            ],
+        },
+    },
+    {
+        "type": "activity",
+        "title": "Garden Color Tone Match",
+        "url": "game://color-sound/garden",
+        "ages": (18, 48),
+        "config": {
+            "game_type": "color_sound_match",
+            "instructions": "Match each garden color to its sound.",
+            "shuffle": True,
+            "pairs": [
+                {
+                    "id": "leaf",
+                    "label": "Leaf green",
+                    "color": "#22C55E",
+                    "tone_hz": 261.63,
+                },
+                {
+                    "id": "flower",
+                    "label": "Flower pink",
+                    "color": "#EC4899",
+                    "tone_hz": 349.23,
+                },
+                {
+                    "id": "sky",
+                    "label": "Sky blue",
+                    "color": "#38BDF8",
+                    "tone_hz": 523.25,
+                },
+            ],
+        },
+    },
+    {
+        "type": "activity",
+        "title": "Rainbow Color Tone Match",
+        "url": "game://color-sound/rainbow",
+        "ages": (24, 60),
+        "config": {
+            "game_type": "color_sound_match",
+            "instructions": "Build a rainbow by matching tones from low to high.",
+            "shuffle": True,
+            "pairs": [
+                {
+                    "id": "orange",
+                    "label": "Orange",
+                    "color": "#F97316",
+                    "tone_hz": 293.66,
+                },
+                {"id": "green", "label": "Green", "color": "#16A34A", "tone_hz": 392},
+                {
+                    "id": "purple",
+                    "label": "Purple",
+                    "color": "#9333EA",
+                    "tone_hz": 493.88,
+                },
+            ],
+        },
+    },
+    {
+        "type": "rhyme",
+        "title": "Baa, Baa, Black Sheep",
+        "url": f"{COMMONS}Bahbahblacksheep.ogg",
+        "ages": (3, 36),
+        "config": {
+            "license": "CC0 1.0",
+            "author": "Rex Sueciae",
+            "source_page": "https://commons.wikimedia.org/wiki/File:Bahbahblacksheep.ogg",
+        },
+    },
 ]
 
 PEDIATRICIANS = [
@@ -103,18 +296,23 @@ def seed() -> None:
             if name not in existing_products
         )
 
-        existing_content = set(session.scalars(select(ContentItem.title)))
-        session.add_all(
-            ContentItem(
-                type=ContentType(kind),
-                title=title,
-                url=f"https://cdn.babycare.local/content/{path}",
-                age_min_months=age_min,
-                age_max_months=age_max,
-            )
-            for kind, title, path, age_min, age_max in CONTENT_ITEMS
-            if title not in existing_content
-        )
+        existing_content = {
+            item.title: item for item in session.scalars(select(ContentItem))
+        }
+        for data in CONTENT_ITEMS:
+            age_min, age_max = data["ages"]
+            values = {
+                "type": ContentType(data["type"]),
+                "url": data["url"],
+                "age_min_months": age_min,
+                "age_max_months": age_max,
+                "config": data["config"],
+            }
+            if item := existing_content.get(data["title"]):
+                for field, value in values.items():
+                    setattr(item, field, value)
+            else:
+                session.add(ContentItem(title=data["title"], **values))
 
         start = datetime(2026, 7, 22, 9, 0, tzinfo=UTC)
         existing_slots = set(session.scalars(select(ConsultationSlot.slot_time)))
