@@ -1,9 +1,10 @@
-"""Seed realistic, deterministic local development data."""
+"""Reset and seed a deterministic, presentation-ready Swaddle demo database."""
 
-from datetime import UTC, date, datetime, timedelta
+from calendar import monthrange
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import delete, text
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
@@ -12,277 +13,399 @@ from app.models import (
     ConsultationSlot,
     ContentItem,
     ContentType,
+    Prescription,
+    PrescriptionStatus,
     Product,
     SlotStatus,
+    SymptomQuery,
     User,
     UserRole,
 )
+from app.prescriptions.constants import AI_DISCLAIMER
+
+COMMONS_MEDIA = "https://commons.wikimedia.org/wiki/Special:Redirect/file/"
 
 PRODUCTS = [
-    ("Soft Muslin Swaddle", "sleep", 0, 6, "24.99", ["cotton", "breathable"]),
-    ("Newborn Diaper Pack", "diapering", 0, 3, "18.50", ["hypoallergenic"]),
-    ("Silicone Feeding Set", "feeding", 6, 36, "29.95", ["bpa-free", "washable"]),
-    ("Digital Bath Thermometer", "bath", 0, 36, "16.99", ["waterproof", "safety"]),
-    ("Wooden Teether Ring", "teething", 3, 18, "12.00", ["natural", "sensory"]),
-    ("Portable White Noise Machine", "sleep", 0, 36, "34.99", ["rechargeable"]),
-    ("Infant Nasal Aspirator", "health", 0, 24, "21.49", ["gentle", "washable"]),
-    ("Baby Nail Care Kit", "grooming", 0, 36, "14.75", ["safety", "travel"]),
-    ("Tummy Time Activity Mat", "play", 0, 12, "42.00", ["sensory", "padded"]),
-    ("Stacking Cups", "play", 6, 36, "15.99", ["motor-skills", "bpa-free"]),
-    ("Sippy Cup Trainer", "feeding", 6, 24, "11.50", ["spill-resistant"]),
-    ("Organic Cotton Bib Set", "feeding", 3, 24, "19.99", ["organic", "washable"]),
-    ("Corner and Outlet Safety Kit", "safety", 6, 36, "27.50", ["baby-proofing"]),
-    ("Board Book Gift Set", "learning", 3, 36, "32.00", ["language", "durable"]),
-    ("Lightweight Baby Carrier", "travel", 3, 24, "69.00", ["ergonomic", "adjustable"]),
+    # Pharmacy and OTC care supplies. Product names deliberately avoid dosage advice.
+    (
+        "Sterile Saline Nasal Drops",
+        "pharmacy",
+        0,
+        24,
+        "6.49",
+        ["nasal", "congestion", "otc"],
+    ),
+    (
+        "Zinc Oxide Diaper Rash Cream",
+        "pharmacy",
+        0,
+        36,
+        "8.99",
+        ["diaper-rash", "skin", "otc"],
+    ),
+    (
+        "Flexible-Tip Digital Thermometer",
+        "pharmacy",
+        0,
+        36,
+        "14.99",
+        ["fever", "temperature", "safety"],
+    ),
+    (
+        "Benzocaine-Free Cooling Teething Gel",
+        "pharmacy",
+        6,
+        24,
+        "7.79",
+        ["teething", "gums", "otc"],
+    ),
+    (
+        "Infant Fever Reducer — Clinician-Guided Use",
+        "pharmacy",
+        2,
+        24,
+        "9.49",
+        ["fever", "clinician-guidance", "otc"],
+    ),
+    # Toys selected to make the three demo ages visibly different.
+    ("Soft Wrist Rattle Pair", "toy", 0, 5, "12.99", ["rattle", "hearing", "grasp"]),
+    (
+        "High-Contrast Crinkle Cards",
+        "toy",
+        0,
+        6,
+        "10.50",
+        ["visual", "tummy-time", "sensory"],
+    ),
+    (
+        "Rainbow Stacking Rings",
+        "toy",
+        6,
+        15,
+        "18.99",
+        ["stacking", "motor-skills", "colors"],
+    ),
+    ("Textured Sensory Balls", "toy", 6, 18, "16.49", ["sensory", "grasp", "rolling"]),
+    (
+        "Wooden Shape Sorter",
+        "toy",
+        12,
+        30,
+        "27.99",
+        ["shapes", "problem-solving", "motor-skills"],
+    ),
+    # General everyday supplies.
+    (
+        "Newborn Sensitive Diapers — 40 Pack",
+        "supplies",
+        0,
+        4,
+        "19.99",
+        ["diapering", "hypoallergenic"],
+    ),
+    (
+        "Fragrance-Free Baby Wipes — 72 Pack",
+        "supplies",
+        0,
+        36,
+        "5.99",
+        ["diapering", "sensitive-skin"],
+    ),
+    (
+        "Wi-Fi Baby Monitor with Night Vision",
+        "supplies",
+        0,
+        36,
+        "79.99",
+        ["sleep", "monitor", "safety"],
+    ),
+    (
+        "Anti-Colic Bottle Set",
+        "supplies",
+        0,
+        12,
+        "24.99",
+        ["feeding", "bottle", "anti-colic"],
+    ),
+    (
+        "Waterproof Toddler Bib Set",
+        "supplies",
+        6,
+        30,
+        "13.99",
+        ["feeding", "washable", "weaning"],
+    ),
 ]
 
-COMMONS = "https://commons.wikimedia.org/wiki/Special:Redirect/file/"
-
-# URLs and licensing metadata are kept together so media provenance remains auditable.
 CONTENT_ITEMS = [
-    {
-        "type": "rhyme",
-        "title": "Twinkle, Twinkle, Little Star",
-        "url": f"{COMMONS}Twinkle_Twinkle_Little_Star_plain.ogg",
-        "ages": (0, 36),
-        "config": {
+    # Free/public-domain recordings with their source and license kept auditable.
+    (
+        "rhyme",
+        "Twinkle, Twinkle, Little Star",
+        f"{COMMONS_MEDIA}Twinkle_Twinkle_Little_Star_plain.ogg",
+        0,
+        24,
+        {
+            "provider": "Wikimedia Commons",
             "license": "Public domain",
-            "author": "CambridgeBayWeather",
             "source_page": "https://commons.wikimedia.org/wiki/File:Twinkle_Twinkle_Little_Star_plain.ogg",
         },
-    },
-    {
-        "type": "rhyme",
-        "title": "Itsy Bitsy Spider",
-        "url": f"{COMMONS}Itsy_Bitsy_Spider.ogg",
-        "ages": (3, 36),
-        "config": {
+    ),
+    (
+        "rhyme",
+        "Itsy Bitsy Spider",
+        f"{COMMONS_MEDIA}Itsy_Bitsy_Spider.ogg",
+        3,
+        24,
+        {
+            "provider": "Wikimedia Commons",
             "license": "CC BY-SA 3.0 / GFDL",
-            "author": "Wwaters",
             "source_page": "https://commons.wikimedia.org/wiki/File:Itsy_Bitsy_Spider.ogg",
         },
-    },
-    {
-        "type": "rhyme",
-        "title": "Row, Row, Row Your Boat",
-        "url": f"{COMMONS}Row%2C_Row%2C_Row_Your_Boat.ogg",
-        "ages": (3, 36),
-        "config": {
+    ),
+    (
+        "rhyme",
+        "Row, Row, Row Your Boat",
+        f"{COMMONS_MEDIA}Row%2C_Row%2C_Row_Your_Boat.ogg",
+        3,
+        24,
+        {
+            "provider": "Wikimedia Commons",
             "license": "CC BY-SA 3.0 / GFDL",
-            "author": "CambridgeBayWeather",
             "source_page": "https://commons.wikimedia.org/wiki/File:Row,_Row,_Row_Your_Boat.ogg",
         },
-    },
-    {
-        "type": "rhyme",
-        "title": "Mary Had a Little Lamb",
-        "url": f"{COMMONS}Mary_Had_a_Little_Lamb.ogg",
-        "ages": (3, 36),
-        "config": {
+    ),
+    (
+        "rhyme",
+        "Mary Had a Little Lamb",
+        f"{COMMONS_MEDIA}Mary_Had_a_Little_Lamb.ogg",
+        6,
+        24,
+        {
+            "provider": "Wikimedia Commons",
             "license": "Public domain",
-            "author": "Celestianpower",
             "source_page": "https://commons.wikimedia.org/wiki/File:Mary_Had_a_Little_Lamb.ogg",
         },
-    },
-    {
-        "type": "video",
-        "title": "Animal Sounds Song",
-        "url": "33UG1Uch05Y",
-        "ages": (12, 48),
-        "config": {"provider": "youtube", "channel": "Kids TV"},
-    },
-    {
-        "type": "video",
-        "title": "Alphabet Song",
-        "url": "cE3LzPQgQmk",
-        "ages": (18, 60),
-        "config": {"provider": "youtube", "channel": "Kids TV"},
-    },
-    {
-        "type": "video",
-        "title": "Wheels on the Bus",
-        "url": "CeUAFs_KyIc",
-        "ages": (12, 48),
-        "config": {"provider": "youtube", "channel": "Kids TV"},
-    },
-    {
-        "type": "video",
-        "title": "Classic Nursery Rhymes",
-        "url": "NVNE19OHfVg",
-        "ages": (18, 60),
-        "config": {"provider": "youtube", "channel": "Doggyland"},
-    },
-    {
-        "type": "sound",
-        "title": "Soft Low Tone",
-        "url": "generated://tone/low",
-        "ages": (0, 36),
-        "config": {
-            "generator": "oscillator",
-            "waveform": "sine",
-            "frequency_hz": 220,
-            "duration_ms": 900,
-            "gain": 0.15,
-        },
-    },
-    {
-        "type": "sound",
-        "title": "Soft Middle Tone",
-        "url": "generated://tone/middle",
-        "ages": (0, 36),
-        "config": {
-            "generator": "oscillator",
-            "waveform": "sine",
-            "frequency_hz": 329.63,
-            "duration_ms": 900,
-            "gain": 0.15,
-        },
-    },
-    {
-        "type": "sound",
-        "title": "Soft High Tone",
-        "url": "generated://tone/high",
-        "ages": (0, 36),
-        "config": {
-            "generator": "oscillator",
-            "waveform": "sine",
-            "frequency_hz": 440,
-            "duration_ms": 900,
-            "gain": 0.15,
-        },
-    },
-    {
-        "type": "activity",
-        "title": "Primary Color Tone Match",
-        "url": "game://color-sound/primary",
-        "ages": (12, 36),
-        "config": {
-            "game_type": "color_sound_match",
-            "instructions": "Hear a tone, then tap its color.",
-            "shuffle": True,
-            "pairs": [
-                {"id": "red-low", "label": "Red", "color": "#EF4444", "tone_hz": 220},
-                {
-                    "id": "yellow-mid",
-                    "label": "Yellow",
-                    "color": "#FACC15",
-                    "tone_hz": 329.63,
-                },
-                {
-                    "id": "blue-high",
-                    "label": "Blue",
-                    "color": "#3B82F6",
-                    "tone_hz": 440,
-                },
-            ],
-        },
-    },
-    {
-        "type": "activity",
-        "title": "Garden Color Tone Match",
-        "url": "game://color-sound/garden",
-        "ages": (18, 48),
-        "config": {
-            "game_type": "color_sound_match",
-            "instructions": "Match each garden color to its sound.",
-            "shuffle": True,
-            "pairs": [
-                {
-                    "id": "leaf",
-                    "label": "Leaf green",
-                    "color": "#22C55E",
-                    "tone_hz": 261.63,
-                },
-                {
-                    "id": "flower",
-                    "label": "Flower pink",
-                    "color": "#EC4899",
-                    "tone_hz": 349.23,
-                },
-                {
-                    "id": "sky",
-                    "label": "Sky blue",
-                    "color": "#38BDF8",
-                    "tone_hz": 523.25,
-                },
-            ],
-        },
-    },
-    {
-        "type": "activity",
-        "title": "Rainbow Color Tone Match",
-        "url": "game://color-sound/rainbow",
-        "ages": (24, 60),
-        "config": {
-            "game_type": "color_sound_match",
-            "instructions": "Build a rainbow by matching tones from low to high.",
-            "shuffle": True,
-            "pairs": [
-                {
-                    "id": "orange",
-                    "label": "Orange",
-                    "color": "#F97316",
-                    "tone_hz": 293.66,
-                },
-                {"id": "green", "label": "Green", "color": "#16A34A", "tone_hz": 392},
-                {
-                    "id": "purple",
-                    "label": "Purple",
-                    "color": "#9333EA",
-                    "tone_hz": 493.88,
-                },
-            ],
-        },
-    },
-    {
-        "type": "rhyme",
-        "title": "Baa, Baa, Black Sheep",
-        "url": f"{COMMONS}Bahbahblacksheep.ogg",
-        "ages": (3, 36),
-        "config": {
+    ),
+    (
+        "rhyme",
+        "Baa, Baa, Black Sheep",
+        f"{COMMONS_MEDIA}Bahbahblacksheep.ogg",
+        6,
+        24,
+        {
+            "provider": "Wikimedia Commons",
             "license": "CC0 1.0",
-            "author": "Rex Sueciae",
             "source_page": "https://commons.wikimedia.org/wiki/File:Bahbahblacksheep.ogg",
         },
-    },
+    ),
+    # URL is the embeddable YouTube video ID, not a full watch URL.
+    (
+        "video",
+        "Animal Sounds Song",
+        "33UG1Uch05Y",
+        6,
+        24,
+        {"provider": "youtube", "channel": "Kids TV", "topic": "animals and listening"},
+    ),
+    (
+        "video",
+        "First Alphabet Song",
+        "cE3LzPQgQmk",
+        12,
+        24,
+        {"provider": "youtube", "channel": "Kids TV", "topic": "early language"},
+    ),
+    (
+        "video",
+        "Wash Your Hands",
+        "kToNHhH74yo",
+        12,
+        24,
+        {"provider": "youtube", "channel": "Kids TV", "topic": "healthy routines"},
+    ),
+    (
+        "video",
+        "Learn Vehicles for Babies",
+        "OIHKD8ACzzY",
+        12,
+        24,
+        {
+            "provider": "youtube",
+            "channel": "CoComelon — Nina's Familia",
+            "topic": "vehicles and environments",
+        },
+    ),
+    (
+        "video",
+        "This Is the Way",
+        "O6uap1FZmzc",
+        18,
+        24,
+        {
+            "provider": "youtube",
+            "channel": "Scoopy Cap",
+            "topic": "daily routines and language",
+        },
+    ),
+    # Generated Web Audio cues: no copyrighted asset or hardcoded game UI required.
+    (
+        "sound",
+        "Where Did the Soft Bell Go?",
+        "generated://hearing/soft-bell",
+        0,
+        6,
+        {
+            "description": (
+                "Play a gentle bell cue on alternating sides and pause for the "
+                "baby to orient."
+            ),
+            "generator": "oscillator",
+            "waveform": "sine",
+            "frequency_hz": 523.25,
+            "duration_ms": 500,
+            "gain": 0.10,
+        },
+    ),
+    (
+        "sound",
+        "Low and High Tone Turn-Taking",
+        "generated://hearing/low-high",
+        6,
+        15,
+        {
+            "description": (
+                "Alternate two short tones and encourage a reach after each cue."
+            ),
+            "cues": [
+                {"label": "low", "frequency_hz": 261.63},
+                {"label": "high", "frequency_hz": 523.25},
+            ],
+            "duration_ms": 450,
+            "gain": 0.12,
+        },
+    ),
+    (
+        "sound",
+        "Copy the Three-Sound Pattern",
+        "generated://hearing/pattern",
+        15,
+        24,
+        {
+            "description": (
+                "Play a three-tone pattern and invite the toddler to tap the "
+                "sequence back."
+            ),
+            "cues": [329.63, 392.00, 329.63],
+            "duration_ms": 350,
+            "gain": 0.12,
+        },
+    ),
+    (
+        "activity",
+        "Primary Color Match",
+        "game://color-theory/primary",
+        8,
+        20,
+        {
+            "game_type": "color_pair_match",
+            "instructions": "Match two cards with the same primary color.",
+            "colors": [
+                {"id": "red", "label": "Red", "hex": "#EF4444"},
+                {"id": "yellow", "label": "Yellow", "hex": "#FACC15"},
+                {"id": "blue", "label": "Blue", "hex": "#3B82F6"},
+            ],
+            "matching_pairs": [["red", "red"], ["yellow", "yellow"], ["blue", "blue"]],
+            "shuffle": True,
+        },
+    ),
+    (
+        "activity",
+        "Warm and Cool Color Match",
+        "game://color-theory/warm-cool",
+        15,
+        24,
+        {
+            "game_type": "color_group_match",
+            "instructions": "Match each color card to its warm or cool basket.",
+            "colors": [
+                {"id": "orange", "label": "Orange", "hex": "#F97316", "group": "warm"},
+                {"id": "pink", "label": "Pink", "hex": "#EC4899", "group": "warm"},
+                {"id": "green", "label": "Green", "hex": "#22C55E", "group": "cool"},
+                {"id": "purple", "label": "Purple", "hex": "#9333EA", "group": "cool"},
+            ],
+            "matching_pairs": [
+                ["orange", "warm"],
+                ["pink", "warm"],
+                ["green", "cool"],
+                ["purple", "cool"],
+            ],
+            "shuffle": True,
+        },
+    ),
 ]
 
-PEDIATRICIANS = [
-    "Dr. Asha Menon",
-    "Dr. Rahul Iyer",
-    "Dr. Meera Shah",
-    "Dr. Nikhil Rao",
-    "Dr. Kavya Patel",
-]
+
+def months_ago(months: int, today: date) -> date:
+    """Return the same day-of-month N months ago, clamped for short months."""
+    absolute_month = today.year * 12 + today.month - 1 - months
+    year, zero_based_month = divmod(absolute_month, 12)
+    month = zero_based_month + 1
+    return date(year, month, min(today.day, monthrange(year, month)[1]))
 
 
-def get_or_create_user(session: Session) -> User:
-    user = session.scalar(select(User).where(User.email == "parent@example.com"))
-    if user is None:
-        user = User(
-            email="parent@example.com",
-            role=UserRole.PARENT,
-            hashed_password="$2b$12$developmentOnlyHashNotForProduction",
+def clear_demo_data(session: Session) -> None:
+    """Clear all application rows and reset IDs for repeatable demo URLs."""
+    if session.bind is not None and session.bind.dialect.name == "postgresql":
+        session.execute(
+            text(
+                "TRUNCATE TABLE consultation_slots, content_items, products, "
+                "prescriptions, symptom_queries, babies, users "
+                "RESTART IDENTITY CASCADE"
+            )
         )
-        session.add(user)
-        session.flush()
-    return user
+        return
+
+    for model in (
+        Prescription,
+        SymptomQuery,
+        Baby,
+        ConsultationSlot,
+        ContentItem,
+        Product,
+        User,
+    ):
+        session.execute(delete(model))
 
 
 def seed() -> None:
+    today = date.today()
     with SessionLocal.begin() as session:
-        parent = get_or_create_user(session)
-        if session.scalar(select(Baby).where(Baby.name == "Maya")) is None:
-            session.add(
-                Baby(
-                    user_id=parent.id,
-                    name="Maya",
-                    dob=date(2026, 1, 18),
-                    sex="female",
-                )
-            )
+        clear_demo_data(session)
 
-        existing_products = set(session.scalars(select(Product.name)))
+        parent = User(
+            email="parent@swaddle.demo",
+            role=UserRole.PARENT,
+            hashed_password="$2b$12$demoParentHashNotForProduction",
+        )
+        reviewer = User(
+            email="reviewer@swaddle.demo",
+            role=UserRole.REVIEWER,
+            hashed_password="$2b$12$demoReviewerHashNotForProduction",
+        )
+        session.add_all([parent, reviewer])
+        session.flush()
+
+        babies = [
+            Baby(user_id=parent.id, name="Aarav", dob=months_ago(2, today), sex="male"),
+            Baby(
+                user_id=parent.id, name="Maya", dob=months_ago(8, today), sex="female"
+            ),
+            Baby(user_id=parent.id, name="Noah", dob=months_ago(18, today), sex="male"),
+        ]
+        session.add_all(babies)
+        session.flush()
+
         session.add_all(
             Product(
                 name=name,
@@ -293,40 +416,151 @@ def seed() -> None:
                 tags=tags,
             )
             for name, category, age_min, age_max, price, tags in PRODUCTS
-            if name not in existing_products
+        )
+        session.add_all(
+            ContentItem(
+                type=ContentType(kind),
+                title=title,
+                url=url,
+                age_min_months=age_min,
+                age_max_months=age_max,
+                config=config,
+            )
+            for kind, title, url, age_min, age_max, config in CONTENT_ITEMS
         )
 
-        existing_content = {
-            item.title: item for item in session.scalars(select(ContentItem))
-        }
-        for data in CONTENT_ITEMS:
-            age_min, age_max = data["ages"]
-            values = {
-                "type": ContentType(data["type"]),
-                "url": data["url"],
-                "age_min_months": age_min,
-                "age_max_months": age_max,
-                "config": data["config"],
-            }
-            if item := existing_content.get(data["title"]):
-                for field, value in values.items():
-                    setattr(item, field, value)
-            else:
-                session.add(ContentItem(title=data["title"], **values))
+        session.add_all(
+            [
+                Prescription(
+                    baby_id=babies[0].id,
+                    file_url="demo-upload:///aarav-saline-note.png",
+                    extracted_text={
+                        "medicine_names": ["Saline nasal drops"],
+                        "dosage_text": ["2 drops"],
+                        "frequency_text": ["when needed"],
+                        "raw_ocr_text": "Saline nasal drops - 2 drops when needed",
+                        "ai_disclaimer": AI_DISCLAIMER,
+                    },
+                    status=PrescriptionStatus.PENDING_REVIEW,
+                ),
+                Prescription(
+                    baby_id=babies[1].id,
+                    file_url="demo-upload:///maya-clinic-prescription.pdf",
+                    extracted_text={
+                        "medicine_names": ["Vitamin D3 drops"],
+                        "dosage_text": ["400 IU"],
+                        "frequency_text": ["once daily"],
+                        "raw_ocr_text": "Vitamin D3 drops 400 IU once daily",
+                        "ai_disclaimer": AI_DISCLAIMER,
+                    },
+                    status=PrescriptionStatus.REVIEWED,
+                    reviewer_id=reviewer.id,
+                    reviewer_note=(
+                        "Text matches the uploaded prescription; parent advised to "
+                        "follow the clinician's directions."
+                    ),
+                ),
+                Prescription(
+                    baby_id=babies[2].id,
+                    file_url="demo-upload:///noah-handwritten-prescription.jpg",
+                    extracted_text={
+                        "medicine_names": ["Amoxicillin"],
+                        "dosage_text": ["?25 mg / 5 mL"],
+                        "frequency_text": ["twice daily?"],
+                        "raw_ocr_text": "Amoxicillin ?25 mg/5mL twice daily?",
+                        "ai_disclaimer": AI_DISCLAIMER,
+                    },
+                    status=PrescriptionStatus.FLAGGED,
+                    reviewer_id=reviewer.id,
+                    reviewer_note=(
+                        "Strength and frequency are unclear. Confirm with the "
+                        "prescribing clinician or pharmacist before use."
+                    ),
+                ),
+            ]
+        )
 
-        start = datetime(2026, 7, 22, 9, 0, tzinfo=UTC)
-        existing_slots = set(session.scalars(select(ConsultationSlot.slot_time)))
+        low_response = {
+            "possible_causes": [
+                "A mild viral upper-respiratory illness",
+                "Dry air or environmental irritation",
+            ],
+            "home_care": [
+                "Offer regular feeds and fluids",
+                "Use a cool-mist humidifier and monitor symptoms",
+            ],
+            "red_flags": [
+                "Breathing becomes difficult",
+                "Feeding drops significantly or wet diapers decrease",
+            ],
+            "alert_level": "low",
+            "disclaimer": "This is not medical advice.",
+        }
+        high_response = {
+            "possible_causes": ["An infection requiring urgent in-person assessment"],
+            "home_care": [
+                "Keep the baby comfortably dressed while arranging urgent care"
+            ],
+            "red_flags": ["Fever in a baby younger than 3 months"],
+            "alert_level": "high",
+            "disclaimer": "This is not medical advice.",
+        }
+        session.add_all(
+            [
+                SymptomQuery(
+                    baby_id=babies[1].id,
+                    symptoms="Mild runny nose, playful and feeding normally",
+                    age_months=8,
+                    ai_response=low_response,
+                    alert_level="low",
+                    created_at=datetime.now(UTC) - timedelta(hours=18),
+                ),
+                SymptomQuery(
+                    baby_id=babies[0].id,
+                    symptoms="Fever in a two-month-old baby",
+                    age_months=2,
+                    ai_response=high_response,
+                    alert_level="high",
+                    created_at=datetime.now(UTC) - timedelta(hours=3),
+                ),
+            ]
+        )
+
+        clinicians = [
+            "Dr. Asha Menon — Neonatology",
+            "Dr. Rahul Iyer — General Pediatrics",
+            "Dr. Meera Shah — Pediatric Nutrition",
+            "Dr. Nikhil Rao — Pediatric Allergy",
+            "Dr. Kavya Patel — Developmental Pediatrics",
+        ]
+        slot_times = [
+            (1, 9, 0),
+            (1, 10, 30),
+            (1, 14, 0),
+            (1, 16, 30),
+            (2, 9, 30),
+            (2, 11, 0),
+            (2, 15, 0),
+            (3, 9, 0),
+            (3, 13, 30),
+            (3, 17, 0),
+        ]
         session.add_all(
             ConsultationSlot(
-                pediatrician_name=PEDIATRICIANS[index % len(PEDIATRICIANS)],
-                slot_time=start + timedelta(hours=index),
-                status=SlotStatus.BOOKED if index in {3, 7} else SlotStatus.AVAILABLE,
+                pediatrician_name=clinicians[index % len(clinicians)],
+                slot_time=datetime.combine(
+                    today + timedelta(days=day), time(hour, minute), tzinfo=UTC
+                ),
+                status=(
+                    SlotStatus.BOOKED if index in {1, 4, 8} else SlotStatus.AVAILABLE
+                ),
             )
-            for index in range(10)
-            if start + timedelta(hours=index) not in existing_slots
+            for index, (day, hour, minute) in enumerate(slot_times)
         )
 
-    print("Seeded 15 products, 15 content items, and 10 consultation slots.")
+    print("Reset complete: 2 users, 3 babies, 15 products, 15 content items,")
+    print("3 prescriptions, 2 symptom queries, and 10 consultation slots seeded.")
+    print("Demo baby IDs: 1 = 2 months, 2 = 8 months, 3 = 18 months.")
 
 
 if __name__ == "__main__":

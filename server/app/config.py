@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     )
 
     openai_api_key: str = ""
+    openai_timeout_seconds: float = 25.0
+    openai_max_retries: int = 0
     database_url: str = "postgresql+psycopg://swaddle:swaddle@localhost:5433/swaddle"
     cloudinary_url: str = ""
 

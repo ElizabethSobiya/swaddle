@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from fastapi.testclient import TestClient
+from openai import APITimeoutError
 
 from app.assistant.constants import DISCLAIMER, SYMPTOM_CHECK_MODEL
 from app.assistant.router import get_openai_client
@@ -49,6 +50,9 @@ def test_low_alert_response() -> None:
     assert response.json()["disclaimer"] == DISCLAIMER
     called_model = openai_client.responses.parse.call_args.kwargs["model"]
     assert called_model == SYMPTOM_CHECK_MODEL
+    assert openai_client.responses.parse.call_args.kwargs["reasoning"] == {
+        "effort": "low"
+    }
     db.commit.assert_called_once()
 
 
@@ -123,4 +127,23 @@ def test_symptom_check_returns_bad_gateway_for_invalid_model_output() -> None:
         app.dependency_overrides.clear()
 
     assert response.status_code == 502
+    db.commit.assert_not_called()
+
+
+def test_symptom_check_returns_gateway_timeout() -> None:
+    openai_client = MagicMock()
+    openai_client.responses.parse.side_effect = APITimeoutError(request=MagicMock())
+    db = MagicMock()
+    app.dependency_overrides[get_openai_client] = lambda: openai_client
+    app.dependency_overrides[get_db] = lambda: db
+    try:
+        response = TestClient(app).post(
+            "/api/assistant/symptom-check",
+            json={"baby_id": 1, "symptoms": "Cold and cough", "age_months": 6},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 504
+    assert "timed out" in response.json()["detail"]
     db.commit.assert_not_called()

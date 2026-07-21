@@ -137,9 +137,10 @@ export async function reviewPrescription(
 
 export async function getProducts(
   babyId: number,
+  includeAi = false,
 ): Promise<ProductRecommendation[]> {
   const d = await request<ProductResponseWire>(
-    `/api/products/recommend?baby_id=${babyId}`,
+    `/api/products/recommend?baby_id=${babyId}&include_ai=${includeAi}`,
   );
   const products = d.ai_explained ?? d.rule_based;
   return products.map((p) => ({

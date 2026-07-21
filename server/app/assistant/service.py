@@ -38,7 +38,7 @@ def check_symptoms(
 ) -> SymptomCheckResponse:
     response = client.responses.parse(
         model=SYMPTOM_CHECK_MODEL,
-        reasoning={"effort": "medium"},
+        reasoning={"effort": "low"},
         input=[
             {"role": "system", "content": SYMPTOM_CHECK_SYSTEM_PROMPT},
             {

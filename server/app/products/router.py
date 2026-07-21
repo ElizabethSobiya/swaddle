@@ -19,8 +19,16 @@ router = APIRouter(prefix="/api/products", tags=["products"])
 
 
 def get_optional_openai_client() -> OpenAI | None:
-    api_key = get_settings().openai_api_key
-    return OpenAI(api_key=api_key) if api_key else None
+    settings = get_settings()
+    return (
+        OpenAI(
+            api_key=settings.openai_api_key,
+            timeout=settings.openai_timeout_seconds,
+            max_retries=settings.openai_max_retries,
+        )
+        if settings.openai_api_key
+        else None
+    )
 
 
 @router.get("/recommend", response_model=ProductRecommendationResponse)

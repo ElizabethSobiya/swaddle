@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from openai import OpenAI
+from openai import APIConnectionError, APITimeoutError, OpenAI
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -15,7 +15,12 @@ router = APIRouter(prefix="/api/assistant", tags=["assistant"])
 
 
 def get_openai_client() -> OpenAI:
-    return OpenAI(api_key=get_settings().openai_api_key)
+    settings = get_settings()
+    return OpenAI(
+        api_key=settings.openai_api_key,
+        timeout=settings.openai_timeout_seconds,
+        max_retries=settings.openai_max_retries,
+    )
 
 
 @router.post(
@@ -30,6 +35,16 @@ def symptom_check(
 ) -> SymptomCheckResponse:
     try:
         result = check_symptoms(client, payload)
+    except APITimeoutError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail="The symptom assistant timed out. Please try again.",
+        ) from exc
+    except APIConnectionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="The symptom assistant is temporarily unavailable.",
+        ) from exc
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

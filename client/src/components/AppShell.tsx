@@ -27,8 +27,8 @@ export function AppShell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-800 lg:flex">
-      <aside className="border-b border-stone-200 bg-white lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r">
+    <div className="min-h-screen bg-stone-50 text-slate-800">
+      <aside className="border-b border-stone-200 bg-white lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:h-screen lg:w-64 lg:overflow-y-auto lg:border-b-0 lg:border-r">
         <div className="flex items-center gap-3 px-6 py-5">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-teal-600 text-xl text-white">
             ♡
@@ -53,7 +53,7 @@ export function AppShell({
           ))}
         </nav>
       </aside>
-      <main className="min-w-0 flex-1 p-5 sm:p-8 lg:p-10">{children}</main>
+      <main className="min-w-0 p-5 sm:p-8 lg:ml-64 lg:p-10">{children}</main>
     </div>
   );
 }
