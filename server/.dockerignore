@@ -1,5 +1,14 @@
 __pycache__/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 tests/
 *.py[cod]
+*.egg-info/
+.coverage
 .env
+.env.*
+.venv/
+Dockerfile
+.dockerignore
+README.md

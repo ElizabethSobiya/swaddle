@@ -101,6 +101,61 @@ sudo apt-get install tesseract-ocr
 
 If the executable is unavailable, the extraction endpoint returns HTTP 503.
 
+## Backend deployment
+
+The API ships as a container built from `server/Dockerfile` and is configured for
+Railway through `server/railway.json`. Any Docker host works the same way.
+
+### Container behaviour
+
+`server/docker-entrypoint.sh` starts the process:
+
+- listens on `$PORT` (default `8000`) with `$WEB_CONCURRENCY` Uvicorn workers
+- runs `--proxy-headers` so client IPs and scheme survive the platform's proxy
+- runs migrations first when `RUN_MIGRATIONS=1`, for hosts without a pre-deploy
+  hook; Railway leaves it at `0` and uses the `preDeployCommand` instead
+- runs as the unprivileged `appuser`, and the image carries a Docker
+  `HEALTHCHECK` against `/api/health`
+
+Build and run it locally:
+
+```bash
+docker build -t swaddle-api server
+docker run --rm -p 8000:8000 \
+  -e DATABASE_URL="postgresql+psycopg://swaddle:swaddle@host.docker.internal:5433/swaddle" \
+  -e CORS_ORIGINS="http://localhost:5173" \
+  swaddle-api
+```
+
+### Health endpoints
+
+- `GET /api/health` — liveness; the process is up and its configuration parsed
+- `GET /api/health/ready` — readiness; also runs `SELECT 1` against the database
+  and returns HTTP 503 when it is unreachable
+
+The platform health check targets `/api/health/ready` so a deploy with a broken
+`DATABASE_URL` fails fast instead of serving errors.
+
+### Environment variables
+
+Set these on the host; `.env.example` lists the full set with defaults.
+
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `DATABASE_URL` | yes | `postgres://` and `postgresql://` are rewritten to the psycopg driver |
+| `OPENAI_API_KEY` | yes | symptom check and prescription extraction |
+| `CORS_ORIGINS` | yes | comma-separated exact origins of the deployed client |
+| `CORS_ORIGIN_REGEX` | no | pattern for generated hostnames, e.g. Netlify deploy previews |
+| `DB_POOL_SIZE`, `DB_MAX_OVERFLOW` | no | per-worker pool; total connections are the pool times `WEB_CONCURRENCY` |
+| `DB_POOL_RECYCLE_SECONDS` | no | recycles connections before managed Postgres drops them (default `1800`) |
+| `WEB_CONCURRENCY` | no | Uvicorn worker count (default `2`) |
+| `LOG_LEVEL` | no | Uvicorn log level (default `info`) |
+| `RUN_MIGRATIONS` | no | `1` to migrate on container start (default `0`) |
+| `CLOUDINARY_URL` | no | prescription media storage |
+
+Keep `DB_POOL_SIZE` times `WEB_CONCURRENCY` under the connection limit of the
+Postgres plan.
+
 ## How We Used Codex & GPT-5.6
 
 This project was built using an idea-first, Codex-driven workflow: the concept,
