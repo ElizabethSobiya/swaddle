@@ -1,0 +1,8 @@
+# Only the client workspace is built on Vercel.
+server/
+shared/*/dist/
+docker-compose.yml
+netlify.toml
+ARCHITECTURE.md
+Makefile
+.ruff_cache/
