@@ -101,6 +101,45 @@ sudo apt-get install tesseract-ocr
 
 If the executable is unavailable, the extraction endpoint returns HTTP 503.
 
+## Frontend deployment
+
+The client is a static Vite build hosted on Vercel and configured by the root
+`vercel.json`. Import the repository into Vercel and keep the project root at the
+repository root — the build runs from there so the `@swaddle/types` workspace
+resolves.
+
+`vercel.json` pins the parts Vercel would otherwise guess:
+
+- `installCommand` is `npm ci`, because the repository carries both a
+  `package-lock.json` and a legacy `yarn.lock`
+- `buildCommand` builds only the client workspace, publishing `client/dist`
+- unmatched paths rewrite to `/index.html`; `/api/*` is excluded so a missing
+  `VITE_API_URL` fails as a 404 instead of returning HTML to `fetch`
+- hashed files under `/assets/` are cached immutably, and every response carries
+  `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and
+  `Permissions-Policy`
+
+### Environment variables
+
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `VITE_API_URL` | yes | origin of the deployed API, no trailing slash, e.g. `https://swaddle-api.up.railway.app` |
+
+Vite inlines `VITE_*` variables at build time, so changing this value needs a
+redeploy, not just a restart. Leave it unset locally: the development server
+proxies `/api` to `http://localhost:8001`.
+
+### Pairing with the API
+
+The API must allow the client origin, so set `CORS_ORIGINS` on the backend to the
+production Vercel domain. Deploy previews get generated hostnames, so match them
+with the regex instead of listing each one:
+
+```bash
+CORS_ORIGINS=https://swaddle.vercel.app
+CORS_ORIGIN_REGEX=^https://swaddle-[a-z0-9-]+\.vercel\.app$
+```
+
 ## Backend deployment
 
 The API ships as a container built from `server/Dockerfile` and is configured for
@@ -145,7 +184,7 @@ Set these on the host; `.env.example` lists the full set with defaults.
 | `DATABASE_URL` | yes | `postgres://` and `postgresql://` are rewritten to the psycopg driver |
 | `OPENAI_API_KEY` | yes | symptom check and prescription extraction |
 | `CORS_ORIGINS` | yes | comma-separated exact origins of the deployed client |
-| `CORS_ORIGIN_REGEX` | no | pattern for generated hostnames, e.g. Netlify deploy previews |
+| `CORS_ORIGIN_REGEX` | no | pattern for generated hostnames, e.g. Vercel deploy previews |
 | `DB_POOL_SIZE`, `DB_MAX_OVERFLOW` | no | per-worker pool; total connections are the pool times `WEB_CONCURRENCY` |
 | `DB_POOL_RECYCLE_SECONDS` | no | recycles connections before managed Postgres drops them (default `1800`) |
 | `WEB_CONCURRENCY` | no | Uvicorn worker count (default `2`) |
