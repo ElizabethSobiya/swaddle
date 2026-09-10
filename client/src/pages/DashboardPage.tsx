@@ -12,19 +12,20 @@ const actions: {
     page: 'Symptom Check',
     title: 'Check symptoms',
     copy: 'Get careful, non-diagnostic guidance',
-    color: 'bg-rose-50 text-rose-700',
+    color: 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300',
   },
   {
     page: 'Prescriptions',
     title: 'Scan prescription',
     copy: 'Extract text for professional review',
-    color: 'bg-amber-50 text-amber-700',
+    color:
+      'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300',
   },
   {
     page: 'Consult',
     title: 'Book a consult',
     copy: 'Choose an available pediatrician slot',
-    color: 'bg-sky-50 text-sky-700',
+    color: 'bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300',
   },
 ];
 
@@ -45,7 +46,7 @@ export function DashboardPage({
       >
         A calm place for everyday care, learning, and trusted next steps.
       </PageHeader>
-      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-teal-700 to-teal-500 p-7 text-white shadow-lg shadow-teal-900/10 sm:flex sm:items-center sm:justify-between sm:p-9">
+      <section className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-teal-700 to-teal-500 p-7 text-white shadow-lg shadow-teal-900/10 sm:flex sm:items-center sm:justify-between sm:p-9 dark:from-teal-800 dark:to-teal-600 dark:shadow-black/40">
         <div>
           <p className="text-sm font-semibold text-teal-100">Baby profile</p>
           <h2 className="font-display mt-2 text-4xl font-bold">{baby.name}</h2>
@@ -69,7 +70,7 @@ export function DashboardPage({
           <button
             key={action.page}
             onClick={() => onNavigate(action.page)}
-            className="rounded-3xl border border-stone-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-3xl border border-stone-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:shadow-black/40"
           >
             <span
               className={`inline-block rounded-xl px-3 py-1 text-xs font-bold ${action.color}`}
@@ -77,10 +78,12 @@ export function DashboardPage({
               {action.page}
             </span>
             <h3 className="mt-5 text-lg font-bold">{action.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
               {action.copy}
             </p>
-            <span className="mt-5 block text-teal-600">Explore →</span>
+            <span className="mt-5 block text-teal-600 dark:text-teal-400">
+              Explore →
+            </span>
           </button>
         ))}
       </div>

@@ -8,9 +8,11 @@ import { ErrorState, LoadingState, PageHeader } from '../components/UI';
 import { extractPrescription, reviewPrescription } from '../lib/api';
 
 const badge: Record<PrescriptionStatus, string> = {
-  pending_review: 'bg-amber-100 text-amber-800',
-  reviewed: 'bg-emerald-100 text-emerald-800',
-  flagged: 'bg-rose-100 text-rose-800',
+  pending_review:
+    'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200',
+  reviewed:
+    'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200',
+  flagged: 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-200',
 };
 export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
   const [file, setFile] = useState<File | null>(null);
@@ -68,9 +70,9 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
           event.preventDefault();
           setFile(event.dataTransfer.files?.[0] ?? null);
         }}
-        className="rounded-3xl border-2 border-dashed border-stone-300 bg-white p-8 text-center"
+        className="rounded-3xl border-2 border-dashed border-stone-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900"
       >
-        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-teal-50 text-teal-700">
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300">
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
@@ -84,7 +86,7 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
           </svg>
         </span>
         <p className="mt-4 font-bold">Drop in a prescription image or PDF</p>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           The result always requires pharmacist or doctor review.
         </p>
         <input
@@ -97,18 +99,18 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
         />
         <label
           htmlFor="prescription-file"
-          className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-5 py-3 text-sm font-bold text-teal-800 transition hover:border-teal-300 hover:bg-teal-100 focus-within:ring-2 focus-within:ring-teal-200"
+          className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-5 py-3 text-sm font-bold text-teal-800 transition hover:border-teal-300 hover:bg-teal-100 focus-within:ring-2 focus-within:ring-teal-200 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-200 dark:hover:border-teal-700 dark:hover:bg-teal-900 dark:focus-within:ring-teal-800"
         >
           <span aria-hidden="true">＋</span>
           {file ? 'Browse another file' : 'Browse files'}
         </label>
         {file && (
-          <div className="mx-auto mt-4 flex max-w-md items-center justify-between gap-3 rounded-xl bg-stone-50 px-4 py-3 text-left">
+          <div className="mx-auto mt-4 flex max-w-md items-center justify-between gap-3 rounded-xl bg-stone-50 px-4 py-3 text-left dark:bg-slate-800">
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-700">
+              <p className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">
                 {file.name}
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 {(file.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
@@ -116,7 +118,7 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
               type="button"
               onClick={() => setFile(null)}
               aria-label="Remove selected file"
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-rose-600"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-rose-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-rose-400"
             >
               ×
             </button>
@@ -124,7 +126,7 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
         )}
         <button
           disabled={!file || loading}
-          className="mx-auto mt-7 block rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-40"
+          className="mx-auto mt-7 block rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-40 dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400"
         >
           Extract text
         </button>
@@ -133,7 +135,7 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
         {loading && <LoadingState label="Processing prescription…" />}
         {error && <ErrorState message={error} />}{' '}
         {item && (
-          <section className="rounded-3xl border border-stone-200 bg-white p-6">
+          <section className="rounded-3xl border border-stone-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-xl font-bold">
                 Extraction #{item.id}
@@ -144,7 +146,7 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
                 {item.status.replace('_', ' ')}
               </span>
             </div>
-            <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+            <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
               {item.aiDisclaimer}
             </p>
             <div className="mt-5 grid gap-5 sm:grid-cols-3">
@@ -153,19 +155,19 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
               <ExtractList title="Frequency text" items={item.frequencyText} />
             </div>
             {reviewer && item.status === 'pending_review' && (
-              <div className="mt-6 border-t pt-5">
+              <div className="mt-6 border-t pt-5 dark:border-slate-800">
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Required reviewer note"
-                  className="w-full rounded-xl border p-3"
+                  className="w-full rounded-xl border p-3 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
                 <div className="mt-3 flex gap-3">
                   <button
                     disabled={!note}
                     type="button"
                     onClick={() => review('reviewed')}
-                    className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40"
+                    className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
                   >
                     Mark reviewed
                   </button>
@@ -173,7 +175,7 @@ export function PrescriptionsPage({ baby }: { baby: BabyProfile }) {
                     disabled={!note}
                     type="button"
                     onClick={() => review('flagged')}
-                    className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40"
+                    className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40 dark:bg-rose-500 dark:text-slate-950 dark:hover:bg-rose-400"
                   >
                     Flag
                   </button>
@@ -190,7 +192,7 @@ function ExtractList({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
       <h3 className="text-sm font-bold">{title}</h3>
-      <ul className="mt-2 space-y-1 text-sm text-slate-600">
+      <ul className="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
         {items.length ? (
           items.map((x) => <li key={x}>{x}</li>)
         ) : (

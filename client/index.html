@@ -7,7 +7,38 @@
       name="description"
       content="AI-assisted baby care tools for families."
     />
+    <meta
+      name="theme-color"
+      content="#fafaf9"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#020617"
+      media="(prefers-color-scheme: dark)"
+    />
     <title>Swaddle</title>
+    <script>
+      // Paint the stored theme before first render so reloading in dark mode
+      // never flashes the light background.
+      (function () {
+        try {
+          var stored = window.localStorage.getItem('swaddle-theme');
+          var preference =
+            stored === 'light' || stored === 'dark' || stored === 'system'
+              ? stored
+              : 'system';
+          var dark =
+            preference === 'dark' ||
+            (preference === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (error) {
+          // Blocked storage: fall through to the light default.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

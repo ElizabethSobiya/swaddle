@@ -44,7 +44,7 @@ export function LibraryPage({ ageMonths }: { ageMonths: number }) {
           <button
             key={filter.label}
             onClick={() => setType(filter.value)}
-            className={`rounded-full px-4 py-2 text-sm font-bold ${type === filter.value ? 'bg-teal-600 text-white' : 'border border-stone-200 bg-white text-slate-600'}`}
+            className={`rounded-full px-4 py-2 text-sm font-bold ${type === filter.value ? 'bg-teal-600 text-white dark:bg-teal-500 dark:text-slate-950' : 'border border-stone-200 bg-white text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'}`}
           >
             {filter.label}
           </button>
@@ -117,21 +117,21 @@ function ContentCard({ item }: { item: ContentItem }) {
   }
 
   return (
-    <article className="flex h-full flex-col rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
-      <div className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-50 text-xl text-teal-700">
+    <article className="flex h-full flex-col rounded-3xl border border-stone-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="grid h-12 w-12 place-items-center rounded-2xl bg-teal-50 text-xl text-teal-700 dark:bg-teal-950 dark:text-teal-300">
         {icon}
       </div>
-      <p className="mt-5 text-xs font-bold uppercase tracking-widest text-teal-600">
+      <p className="mt-5 text-xs font-bold uppercase tracking-widest text-teal-600 dark:text-teal-400">
         {item.type}
       </p>
       <h2 className="font-display mt-1 min-h-14 text-xl font-bold">
         {item.title}
       </h2>
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
         Ages {item.ageMinMonths}–{item.ageMaxMonths} months
       </p>
       {item.type === 'activity' && (
-        <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+        <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
           {String(item.config?.instructions ?? 'Interactive activity')}
         </p>
       )}
@@ -142,15 +142,15 @@ function ContentCard({ item }: { item: ContentItem }) {
             setVideoLoading(true);
             setShowVideo(true);
           }}
-          className="mt-5 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-bold text-white"
+          className="mt-5 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-bold text-white dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400"
         >
           Load video
         </button>
       )}
       {item.type === 'video' && showVideo && (
-        <div className="relative mt-5 aspect-video overflow-hidden rounded-2xl bg-slate-100">
+        <div className="relative mt-5 aspect-video overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
           {videoLoading && (
-            <div className="absolute inset-0 grid place-items-center text-sm text-slate-500">
+            <div className="absolute inset-0 grid place-items-center text-sm text-slate-500 dark:text-slate-400">
               Loading video…
             </div>
           )}
@@ -172,14 +172,14 @@ function ContentCard({ item }: { item: ContentItem }) {
       )}
       {item.type === 'sound' && (
         <div className="flex flex-1 flex-col">
-          <p className="mt-4 rounded-xl bg-sky-50 p-3 text-sm text-sky-900">
+          <p className="mt-4 rounded-xl bg-sky-50 p-3 text-sm text-sky-900 dark:bg-sky-950/40 dark:text-sky-200">
             {String(item.config?.description ?? 'A short listening activity.')}
           </p>
           <div className="mt-auto pt-4">
             <button
               type="button"
               onClick={playGeneratedSound}
-              className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white"
+              className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white dark:bg-sky-500 dark:text-slate-950 dark:hover:bg-sky-400"
             >
               Play sound cue
             </button>

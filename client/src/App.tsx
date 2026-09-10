@@ -60,8 +60,8 @@ export function App() {
 
   return (
     <AppShell page={page} onNavigate={setPage}>
-      <section className="mb-7 flex flex-wrap items-center gap-3 rounded-2xl border border-stone-200 bg-white p-3 shadow-sm">
-        <p className="px-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+      <section className="mb-7 flex flex-wrap items-center gap-3 rounded-2xl border border-stone-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p className="px-2 text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Demo baby
         </p>
         {babies.map((profile) => (
@@ -69,13 +69,13 @@ export function App() {
             key={profile.id}
             type="button"
             onClick={() => setBabyId(profile.id)}
-            className={`rounded-xl px-4 py-2 text-left text-sm transition ${profile.id === baby.id ? 'bg-teal-600 text-white shadow-sm' : 'bg-stone-50 text-slate-600 hover:bg-teal-50 hover:text-teal-700'}`}
+            className={`rounded-xl px-4 py-2 text-left text-sm transition ${profile.id === baby.id ? 'bg-teal-600 text-white shadow-sm dark:bg-teal-500 dark:text-slate-950' : 'bg-stone-50 text-slate-600 hover:bg-teal-50 hover:text-teal-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-teal-950 dark:hover:text-teal-300'}`}
           >
             <span className="font-bold">{profile.name}</span>
             <span className="ml-2 opacity-80">{profile.ageMonths} months</span>
           </button>
         ))}
-        <p className="ml-auto hidden text-xs text-slate-500 md:block">
+        <p className="ml-auto hidden text-xs text-slate-500 md:block dark:text-slate-400">
           Shop and Library adapt to the selected age
         </p>
       </section>
