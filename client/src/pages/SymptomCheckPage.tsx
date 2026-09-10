@@ -4,9 +4,10 @@ import { ErrorState, LoadingState, PageHeader } from '../components/UI';
 import { checkSymptoms } from '../lib/api';
 
 const alertStyles = {
-  low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  medium: 'bg-amber-50 text-amber-800 border-amber-200',
-  high: 'bg-rose-50 text-rose-800 border-rose-200',
+  low: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-200 dark:border-emerald-900/60',
+  medium:
+    'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-900/60',
+  high: 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-200 dark:border-rose-900/60',
 };
 
 export function SymptomCheckPage({
@@ -43,7 +44,7 @@ export function SymptomCheckPage({
       </PageHeader>
       <form
         onSubmit={submit}
-        className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm"
+        className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         <label htmlFor="symptoms" className="text-sm font-bold">
           What symptoms is {baby.name} experiencing?
@@ -55,15 +56,15 @@ export function SymptomCheckPage({
           value={symptoms}
           onChange={(e) => setSymptoms(e.target.value)}
           placeholder="For example: mild cough since yesterday, feeding normally…"
-          className="mt-3 min-h-36 w-full rounded-2xl border border-stone-200 bg-stone-50 p-4 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+          className="mt-3 min-h-36 w-full rounded-2xl border border-stone-200 bg-stone-50 p-4 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-teal-400 dark:focus:ring-teal-900"
         />
         <div className="mt-4 flex items-center justify-between gap-4">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 dark:text-slate-500">
             Age supplied: {ageMonths} months
           </p>
           <button
             disabled={loading}
-            className="rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-50"
+            className="rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-50 dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400"
           >
             Check symptoms
           </button>
@@ -102,12 +103,12 @@ export function SymptomCheckPage({
 
 function ResponseCard({ title, items }: { title: string; items: string[] }) {
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-6">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
       <h2 className="font-display text-lg font-bold">{title}</h2>
-      <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+      <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
         {items.map((item) => (
           <li key={item} className="flex gap-2">
-            <span className="text-teal-500">•</span>
+            <span className="text-teal-500 dark:text-teal-400">•</span>
             {item}
           </li>
         ))}

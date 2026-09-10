@@ -6,8 +6,13 @@
 
 :root {
   font-family: 'DM Sans', system-ui, sans-serif;
+  /* Overridden inline by the theme boot script; this is the no-JS fallback. */
   color-scheme: light;
   font-synthesis: none;
+}
+
+:root.dark {
+  color-scheme: dark;
 }
 
 .font-display {
@@ -19,6 +24,12 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: #fafaf9;
+  transition: background-color 150ms ease;
+}
+
+:root.dark body {
+  /* Matches slate-950, the dark page background used by AppShell. */
+  background: #020617;
 }
 
 button,
